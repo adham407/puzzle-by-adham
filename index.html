@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Image Puzzle Game</title>
+<style>
+  body {
+    font-family: Arial;
+    text-align: center;
+    background: #f0f0f0;
+  }
+
+  h1 { margin-top: 20px; }
+
+  .btn {
+    margin: 10px;
+    border: none;
+    cursor: pointer;
+    border-radius: 10px;
+  }
+
+  .easy { width: 80px; height: 40px; background: lightgreen; }
+  .medium { width: 120px; height: 60px; background: gold; }
+  .hard { width: 160px; height: 80px; background: orange; }
+  .extreme { width: 220px; height: 110px; background: red; }
+  .insane { width: 320px; height: 160px; background: purple; color: white; }
+
+  #gameArea {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 40px;
+    margin-top: 20px;
+  }
+
+  #board {
+    display: grid;
+    gap: 2px;
+  }
+
+  .cell {
+    width: 80px;
+    height: 80px;
+    border: 1px solid #ccc;
+  }
+
+  .piece {
+    width: 80px;
+    height: 80px;
+    cursor: grab;
+  }
+
+  #pieces {
+    display: grid;
+    gap: 5px;
+  }
+</style>
+</head>
+<body>
+
+<h1>🧩 1000 Image Puzzle Game</h1>
+<p style="font-size:18px; color:#333;">Created by Adham</p>
+
+<button class="btn easy" onclick="startGame(2)">Easy</button>
+<button class="btn medium" onclick="startGame(3)">Medium</button>
+<button class="btn hard" onclick="startGame(4)">Hard</button>
+<button class="btn extreme" onclick="startGame(5)">Extreme</button>
+<button class="btn insane" onclick="startGame(6)">Insane</button>
+
+<div id="gameArea">
+  <div id="board"></div>
+  <div id="pieces"></div>
+</div>
+
+<script>
+let size;
+
+// Generate 1000 different images
+const images = [];
+for (let i = 1; i <= 1000; i++) {
+  images.push(`https://picsum.photos/400?random=${i}`);
+}
+
+function getRandomImage() {
+  return images[Math.floor(Math.random() * images.length)];
+}
+
+function startGame(n) {
+  size = n;
+  const imageURL = getRandomImage();
+
+  const board = document.getElementById('board');
+  const piecesDiv = document.getElementById('pieces');
+
+  board.innerHTML = '';
+  piecesDiv.innerHTML = '';
+
+  board.style.gridTemplateColumns = `repeat(${size}, 80px)`;
+  piecesDiv.style.gridTemplateColumns = `repeat(${Math.ceil(size)}, 80px)`;
+
+  let pieces = [];
+
+  // Create board
+  for (let i = 0; i < size * size; i++) {
+    const cell = document.createElement('div');
+    cell.className = 'cell';
+    cell.dataset.index = i;
+
+    cell.ondragover = e => e.preventDefault();
+
+    cell.ondrop = function(e) {
+      const pieceId = e.dataTransfer.getData('text');
+      const piece = document.getElementById(pieceId);
+
+      if (piece.dataset.correct == this.dataset.index) {
+        this.appendChild(piece);
+        piece.draggable = false;
+        piece.style.cursor = 'default';
+        checkWin();
+      }
+    };
+
+    board.appendChild(cell);
+  }
+
+  // Create pieces
+  for (let row = 0; row < size; row++) {
+    for (let col = 0; col < size; col++) {
+      const index = row * size + col;
+
+      const piece = document.createElement('div');
+      piece.className = 'piece';
+      piece.id = 'piece' + index;
+      piece.draggable = true;
+      piece.dataset.correct = index;
+
+      piece.style.backgroundImage = `url(${imageURL})`;
+      piece.style.backgroundSize = `${size * 80}px ${size * 80}px`;
+      piece.style.backgroundPosition = `-${col * 80}px -${row * 80}px`;
+
+      piece.ondragstart = function(e) {
+        e.dataTransfer.setData('text', this.id);
+      };
+
+      pieces.push(piece);
+    }
+  }
+
+  // Shuffle
+  pieces.sort(() => Math.random() - 0.5);
+
+  pieces.forEach(p => piecesDiv.appendChild(p));
+}
+
+function checkWin() {
+  const cells = document.querySelectorAll('.cell');
+  let correct = 0;
+
+  cells.forEach(cell => {
+    if (cell.children.length === 1 &&
+        cell.children[0].dataset.correct == cell.dataset.index) {
+      correct++;
+    }
+  });
+
+  if (correct === size * size) {
+    alert('🎉 You completed the picture!');
+  }
+}
+</script>
+
+<footer style="margin-top:40px; padding:10px; font-size:14px; color:#000000;">
+  © 2026 Adham Mahmoud Adel Omran.
+</footer>
+
+</body>
+</html>
