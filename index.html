@@ -2,28 +2,39 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Image Puzzle Game</title>
+<title>Realistic Puzzle Game</title>
 <style>
   body {
+    margin: 0;
     font-family: Arial;
     text-align: center;
-    background: #f0f0f0;
+    color: white;
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
   }
 
-  h1 { margin-top: 20px; }
+  h1 {
+    margin-top: 20px;
+    text-shadow: 2px 2px 5px black;
+  }
 
   .btn {
     margin: 10px;
     border: none;
     cursor: pointer;
-    border-radius: 10px;
+    border-radius: 12px;
+    font-weight: bold;
+    transition: 0.3s;
+  }
+
+  .btn:hover {
+    transform: scale(1.1);
   }
 
   .easy { width: 80px; height: 40px; background: lightgreen; }
   .medium { width: 120px; height: 60px; background: gold; }
   .hard { width: 160px; height: 80px; background: orange; }
   .extreme { width: 220px; height: 110px; background: red; }
-  .insane { width: 320px; height: 160px; background: purple; color: white; }
+  .insane { width: 320px; height: 160px; background: purple; }
 
   #gameArea {
     display: flex;
@@ -35,37 +46,61 @@
 
   #board {
     display: grid;
-    gap: 2px;
+    gap: 4px;
+    background: rgba(255,255,255,0.1);
+    padding: 10px;
+    border-radius: 15px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
   }
 
   .cell {
     width: 80px;
     height: 80px;
-    border: 1px solid #ccc;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.1);
   }
 
   .piece {
     width: 80px;
     height: 80px;
     cursor: grab;
+    border-radius: 15px;
+    box-shadow: 0 5px 10px rgba(0,0,0,0.5);
+    transition: 0.2s;
+  }
+
+  .piece:hover {
+    transform: scale(1.05);
   }
 
   #pieces {
     display: grid;
-    gap: 5px;
+    gap: 10px;
+    background: rgba(0,0,0,0.3);
+    padding: 10px;
+    border-radius: 15px;
+  }
+
+  footer {
+    margin-top: 30px;
+    padding: 10px;
+    color: #ddd;
   }
 </style>
 </head>
 <body>
 
-<h1>🧩 1000 Image Puzzle Game</h1>
-<p style="font-size:18px; color:#333;">Created by Adham</p>
+<h1>🧩 Realistic Puzzle Game</h1>
+<p>Created by Adham</p>
 
 <button class="btn easy" onclick="startGame(2)">Easy</button>
 <button class="btn medium" onclick="startGame(3)">Medium</button>
 <button class="btn hard" onclick="startGame(4)">Hard</button>
 <button class="btn extreme" onclick="startGame(5)">Extreme</button>
 <button class="btn insane" onclick="startGame(6)">Insane</button>
+
+<h3 id="turn">Player 1's Turn</h3>
+<h3 id="score">Player 1: 0 | Player 2: 0</h3>
 
 <div id="gameArea">
   <div id="board"></div>
@@ -74,8 +109,9 @@
 
 <script>
 let size;
+let currentPlayer = 1;
+let scores = {1:0, 2:0};
 
-// Generate 1000 different images
 const images = [];
 for (let i = 1; i <= 1000; i++) {
   images.push(`https://picsum.photos/400?random=${i}`);
@@ -87,6 +123,9 @@ function getRandomImage() {
 
 function startGame(n) {
   size = n;
+  currentPlayer = 1;
+  document.getElementById('turn').innerText = "Player 1's Turn";
+
   const imageURL = getRandomImage();
 
   const board = document.getElementById('board');
@@ -100,7 +139,6 @@ function startGame(n) {
 
   let pieces = [];
 
-  // Create board
   for (let i = 0; i < size * size; i++) {
     const cell = document.createElement('div');
     cell.className = 'cell';
@@ -116,6 +154,7 @@ function startGame(n) {
         this.appendChild(piece);
         piece.draggable = false;
         piece.style.cursor = 'default';
+        piece.style.boxShadow = 'none';
         checkWin();
       }
     };
@@ -123,7 +162,6 @@ function startGame(n) {
     board.appendChild(cell);
   }
 
-  // Create pieces
   for (let row = 0; row < size; row++) {
     for (let col = 0; col < size; col++) {
       const index = row * size + col;
@@ -146,10 +184,13 @@ function startGame(n) {
     }
   }
 
-  // Shuffle
   pieces.sort(() => Math.random() - 0.5);
-
   pieces.forEach(p => piecesDiv.appendChild(p));
+}
+
+function switchPlayer(){
+  currentPlayer = currentPlayer === 1 ? 2 : 1;
+  document.getElementById('turn').innerText = "Player " + currentPlayer + "'s Turn";
 }
 
 function checkWin() {
@@ -164,13 +205,18 @@ function checkWin() {
   });
 
   if (correct === size * size) {
-    alert('🎉 You completed the picture!');
+    scores[currentPlayer]++;
+    alert('🎉 Player ' + currentPlayer + ' wins!');
+    document.getElementById('score').innerText =
+      `Player 1: ${scores[1]} | Player 2: ${scores[2]}`;
+  } else {
+    switchPlayer();
   }
 }
 </script>
 
-<footer style="margin-top:40px; padding:10px; font-size:14px; color:#000000;">
-  © 2026 Adham Mahmoud Adel Omran.
+<footer>
+  © 2026 Adham Mahmoud Adel Omran
 </footer>
 
 </body>
